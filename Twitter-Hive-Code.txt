@@ -1,0 +1,75 @@
+Using geo tagged tweet data to calculate several Hive queries
+
+
+
+# Find hour of the day that generated most number of tweets on March 6, 2010
+
+select hour(ts) as hour_of_day, count(*) tweet_count
+from twitter.full_text_ts
+where to_date(ts) = '2010-03-06'
+group by hour(ts)
+order by tweet_count desc;
+limit 1;
+
+
+
+
+
+# Find the most mobile tweeter
+
+## User who tweeted from most distinct location (lat-lon)
+
+select id, count(distinct t.lat_lon) as dist_loc
+from 
+  (select id, concat(lat, ',', lon) as lat_lon from twitter.full_text_ts) t
+group by id
+order by dist_loc desc;
+limit 1;
+
+
+
+
+
+
+# Find 3 most popular topics (hashtags)
+
+select t.hashtag, count(*) as tweet_count
+from 
+   (select regexp_extract(lower(tweet), '(.*)#(\\w+)(.*)',2) as hashtag from twitter.full_text_ts) t
+group by t.hashtag
+order by tweet_count desc
+limit 3;
+
+
+select t.hashtag, count(*) as tweet_count
+from 
+   (select regexp_extract(lower(tweet), '(.*)#(\\w+)(.*)',2) as hashtag from full_text_ts) t
+group by t.hashtag
+order by tweet_count desc
+limit 3;
+
+
+
+
+# Find most frequently mentioned twitter handle @
+
+select t.twitter_handle, count(*) as tweet_count
+from 
+   (select regexp_extract(lower(tweet), '(.*)@user_(\\S{8})([:| ])(.*)',2) as twitter_handle from twitter.full_text_ts) t
+group by t.twitter_handle
+order by tweet_count desc;
+limit 1;
+
+
+select t.twitter_handle, count(*) as tweet_count
+from 
+   (select regexp_extract(lower(tweet), '(.*)@user_(\\S{8})([:| ])(.*)',2) as twitter_handle from full_text_ts) t
+group by t.twitter_handle
+order by tweet_count desc;
+limit 1;
+
+
+
+
+
+
